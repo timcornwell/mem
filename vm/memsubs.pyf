@@ -1,0 +1,122 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module memoneit__user__routines 
+    interface memoneit_user_interface 
+        subroutine calgch(imsz,mem,wt,gch,chisq) ! in :memsubs:memsubs.f:memoneit:unknown_interface
+            integer intent(in) :: imsz
+            real dimension(*),intent(inout),depend(imsz) :: mem
+            real dimension(*),intent(in),depend(imsz) :: wt
+            real dimension(*),intent(in) :: gch
+            real intent(out) :: chisq
+        end subroutine calgch
+    end interface memoneit_user_interface
+end python module memoneit__user__routines
+python module memsubs ! in 
+    interface  ! in :memsubs
+        subroutine memoneit(doinit,imsz,mem,def,deflev,stp,gch,wt,q,tflux,tchisq,tol,flux,chisq,entrpy,nrmgrd,calgch) ! in :memsubs:memsubs.f
+            use memoneit__user__routines
+            logical :: doinit
+            integer intent(in) :: imsz
+            real dimension(*),intent(inout),depend(imsz) :: mem
+            real dimension(*),intent(in),depend(imsz) :: def
+            real intent(in) :: deflev
+            real dimension(*),intent(inout),depend(imsz) :: stp
+            real dimension(*),intent(in) :: gch
+            real dimension(*),intent(in),depend(imsz) :: wt
+            real intent(inout) :: q
+            real intent(in) :: tflux
+            real intent(in) :: tchisq
+            real intent(in) :: tol
+            real intent(out) :: flux
+            real intent(out) :: chisq
+            real intent(out) :: entrpy
+            real intent(out) :: nrmgrd
+            external calgch
+        end subroutine memoneit
+        subroutine memcalhf(imsz,in1,in2,deflev,flux,entrpy) ! in :memsubs:memsubs.f
+            integer :: imsz
+            real dimension(*) :: in1
+            real dimension(*) :: in2
+            real :: deflev
+            real :: flux
+            real :: entrpy
+        end subroutine memcalhf
+        subroutine memchalb(imsz,mem,def,deflev,gch,wt,alpha,beta,q,flux,tflux,chisq,tchisq,tol,nrmgrd,gdg) ! in :memsubs:memsubs.f
+            integer :: imsz
+            real dimension(*) :: mem
+            real dimension(*) :: def
+            real :: deflev
+            real dimension(*) :: gch
+            real dimension(*) :: wt
+            real :: alpha
+            real :: beta
+            real :: q
+            real :: flux
+            real :: tflux
+            real :: chisq
+            real :: tchisq
+            real :: tol
+            real :: nrmgrd
+            double precision dimension(4,4) :: gdg
+        end subroutine memchalb
+        subroutine memclstp(imsz,mem,def,deflev,stp,gch,wt,alpha,beta,q,flux,immax,immin,nrmgrd,gdg,gdstep) ! in :memsubs:memsubs.f
+            integer :: imsz
+            real dimension(*) :: mem
+            real dimension(*) :: def
+            real :: deflev
+            real dimension(*) :: stp
+            real dimension(*) :: gch
+            real dimension(*) :: wt
+            real :: alpha
+            real :: beta
+            real :: q
+            real :: flux
+            real :: immax
+            real :: immin
+            real :: nrmgrd
+            double precision dimension(4,4) :: gdg
+            real :: gdstep
+        end subroutine memclstp
+        subroutine memgds(imsz,mem,def,deflev,stp,gch,alpha,beta,gdstep) ! in :memsubs:memsubs.f
+            integer :: imsz
+            real dimension(*) :: mem
+            real dimension(*) :: def
+            real :: deflev
+            real dimension(*) :: stp
+            real dimension(*) :: gch
+            real :: alpha
+            real :: beta
+            real :: gdstep
+        end subroutine memgds
+        subroutine meminiab(gdg,alpha,beta,tflux) ! in :memsubs:memsubs.f
+            double precision dimension(4,4) :: gdg
+            real :: alpha
+            real :: beta
+            real :: tflux
+        end subroutine meminiab
+        subroutine memtakst(n,in1,in2,wt1,wt2,imlo,out) ! in :memsubs:memsubs.f
+            integer optional,check(len(in1)>=n),depend(in1) :: n=len(in1)
+            real dimension(n) :: in1
+            real dimension(n),depend(n) :: in2
+            real :: wt1
+            real :: wt2
+            real :: imlo
+            real dimension(n),depend(n) :: out
+        end subroutine memtakst
+        subroutine memupdat(gdg,tol,tflux,tchisq,flux,chisq,length,alpha,beta) ! in :memsubs:memsubs.f
+            double precision dimension(4,4) :: gdg
+            real :: tol
+            real :: tflux
+            real :: tchisq
+            real :: flux
+            real :: chisq
+            real :: length
+            real :: alpha
+            real :: beta
+        end subroutine memupdat
+    end interface 
+end python module memsubs
+
+! This file was auto-generated with f2py (version:2_3198).
+! See http://cens.ioc.ee/projects/f2py2e/

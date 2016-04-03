@@ -1,0 +1,641 @@
+#!/bin/sh
+# This is a shell archive (produced by GNU sharutils 4.1).
+# To extract the files from this archive, save it to some FILE, remove
+# everything before the `!/bin/sh' line above, then type `sh FILE'.
+#
+# Made on 1995-10-17 08:28 MDT by <tcornwel@noggs>.
+# Source directory was `/home/noggs/tcornwel/projects/mem/newmem/nr/shar'.
+#
+# Existing files will *not* be overwritten unless `-c' is specified.
+#
+# This shar contains:
+# length mode       name
+# ------ ---------- ------------------------------------------
+#   2641 -rw-r--r-- dmemimg.f
+#    129 -rw-r--r-- makefile
+#   4590 -rw-r--r-- nmem.f
+#   5534 -rw-r--r-- nr.f
+#
+touch -am 1231235999 $$.touch >/dev/null 2>&1
+if test ! -f 1231235999 && test -f $$.touch; then
+  shar_touch=touch
+else
+  shar_touch=:
+  echo
+  echo 'WARNING: not restoring timestamps.  Consider getting and'
+  echo "installing GNU \`touch', distributed in GNU File Utilities..."
+  echo
+fi
+rm -f 1231235999 $$.touch
+#
+# ============= dmemimg.f ==============
+if test -f 'dmemimg.f' && test X"$1" != X"-c"; then
+  echo 'x - skipping dmemimg.f (file already exists)'
+else
+  echo 'x - extracting dmemimg.f (text)'
+  sed 's/^X//' << 'SHAR_EOF' > 'dmemimg.f' &&
+X      PROGRAM DMEMIMG
+C
+C Driver for MEM routines. Solves circular convolution.
+C
+X      INTEGER MAXIMSZ
+X      PARAMETER(MAXIMSZ=100)
+C
+X      INTEGER J, NITER, IMSZ, DATASZ
+X      REAL TOL, MODEL(MAXIMSZ), DOBS(MAXIMSZ)
+X      REAL MEM(MAXIMSZ), DEF(MAXIMSZ), SIGMA(MAXIMSZ), LAMBDA(MAXIMSZ)
+C
+X      REAL MM(6*MAXIMSZ)
+X      COMMON /MEMCOM/ MM
+C
+X      WRITE(*,*) 'Maximum entropy deconvolution program'
+C
+X      TOL = 1E-20
+X      DATASZ = 64
+X      IMSZ = DATASZ
+X      NITER=100
+C
+C Initialize model data
+C
+X      DO 1 I=1,IMSZ
+X         MODEL(I)=0.0
+X    1 CONTINUE
+X      MODEL(33)=900.0
+X      DO 2 I=34,48
+X         MODEL(I)=20.0
+X    2 CONTINUE
+X      MODEL(49)=200.0
+C
+C Find total flux
+C
+X      FLUX = 0.0
+X      DO 3 I=1,IMSZ
+X         FLUX=FLUX+MODEL(I)
+X 3    CONTINUE
+C
+C Initialize SIGMA
+C
+X      DO 4 J=1,DATASZ
+X         SIGMA(J)=1.0E-6
+X 4    CONTINUE
+C
+C Find predicted data
+C
+X      CALL MMAX (IMSZ, DATASZ, MODEL, DOBS)
+C
+C Set up default image
+C
+X      DO 9 I = 1,IMSZ
+X         DEF(I) = FLUX/FLOAT(IMSZ)
+X 9    CONTINUE
+C
+C Actually do iterations
+C
+X      CALL MMSOLVE (DATASZ, IMSZ, TOL, NITER, FLUX, FLOAT(DATASZ), 
+X     $   DEF, DOBS, SIGMA, MEM, LAMBDA)
+C
+X      WRITE(*,1000)
+X      WRITE(*,1010)
+X      DO 50 I = 1, IMSZ
+X         WRITE(6,1020) I, MODEL(I), DEF(I), DOBS(I), MEM(I),
+X     $      MEM(I)-MODEL(I)
+X 50   CONTINUE
+C
+X 1000 FORMAT (1X,'PixelNo',7X,'Model',5X,'a priori',3X,
+X     &        'DOBS',5X,'Image',6X,'Residuals')
+X 1010 FORMAT ('---------------------------------------------',
+X     &         '--------------------')
+X 1020 FORMAT (2X,I2,10X,F5.1,6X,F5.1,5X,F5.1,4X,F6.2,4X,F8.3)
+C
+X      END
+C----------------------------------------------------------------------
+X      SUBROUTINE MMAX(IMSZ, DATASZ, IN, OUT)
+C
+C Returns A * X i.e. OUT(J)=SUM(I) [A(I,J) * IN(I)]
+C
+X      INTEGER DATASZ, IMSZ
+X      REAL IN(*), OUT(*)
+X      CALL CONVOLVEARRAY (DATASZ, IN, OUT)
+C
+X      END
+C----------------------------------------------------------------------
+X      SUBROUTINE MMATD(DATASZ, IMSZ, IN, OUT)
+C
+C Returns A^T * D i.e. OUT(I)=SUM(J) [A(J,I) * IN(J)]
+C
+X      INTEGER DATASZ, IMSZ
+X      REAL IN(*), OUT(*)
+X      CALL CONVOLVEARRAY (DATASZ, IN, OUT)
+C
+X      END
+C---------------------------------------------------------
+X      SUBROUTINE CONVOLVEARRAY(N,S,T)
+C
+C  Convolve circularly 
+C
+X      REAL T(1),S(1),TEMP(512)
+X      INTEGER N,J
+X      TEMP(1)=(S(N-1)+S(N)+S(1)+S(2)+S(3))
+X      TEMP(2)=(S(N)+S(1)+S(2)+S(3)+S(4))
+X      DO 1  J=3,N-2
+X    1 TEMP(J)=(S(J-2)+S(J-1)+S(J)+S(J+1)+S(J+2))
+X      TEMP(N-1)=(S(N-3)+S(N-2)+S(N-1)+S(N)+S(1))
+X      TEMP(N)=(S(N-2)+S(N-1)+S(N)+S(1)+S(2))
+X      DO 2 J=1,N
+X    2 T(J) = 0.2*TEMP(J)
+X      END
+SHAR_EOF
+  $shar_touch -am 1017082795 'dmemimg.f' &&
+  chmod 0644 'dmemimg.f' ||
+  echo 'restore of dmemimg.f failed'
+  shar_count="`wc -c < 'dmemimg.f'`"
+  test 2641 -eq "$shar_count" ||
+    echo "dmemimg.f: original size 2641, current size $shar_count"
+fi
+# ============= makefile ==============
+if test -f 'makefile' && test X"$1" != X"-c"; then
+  echo 'x - skipping makefile (file already exists)'
+else
+  echo 'x - extracting makefile (text)'
+  sed 's/^X//' << 'SHAR_EOF' > 'makefile' &&
+FFLAGS = -g
+FC = f77
+FOBJ=nr.o
+dmemimg: nmem.o dmemimg.o ${FOBJ}
+X	${FC} ${FFLAGS} dmemimg.o nmem.o ${FOBJ} -lF77 -lm -o dmemimg
+X
+SHAR_EOF
+  $shar_touch -am 1017082795 'makefile' &&
+  chmod 0644 'makefile' ||
+  echo 'restore of makefile failed'
+  shar_count="`wc -c < 'makefile'`"
+  test 129 -eq "$shar_count" ||
+    echo "makefile: original size 129, current size $shar_count"
+fi
+# ============= nmem.f ==============
+if test -f 'nmem.f' && test X"$1" != X"-c"; then
+  echo 'x - skipping nmem.f (file already exists)'
+else
+  echo 'x - extracting nmem.f (text)'
+  sed 's/^X//' << 'SHAR_EOF' > 'nmem.f' &&
+C@
+C This set of MEM routines solves A*X=D+E where:
+C    X is an unknown Image
+C    D is some measured Data
+C    E is an error term
+C    A is a linear operator i.e. a matrix in this discrete representation
+C
+C The solution is that which:
+C    Maximizes the entropy
+C       H=-SUM(I) [X(I)*LN(X(I)/M(I))]
+C       where M(I) is a default image
+C    Fits the data such that
+C       SUM(J) [(Dobs(J)-DPredicted(J))/SIGMA(J)]**2 = OMEGA
+C    Has total flux
+C       SUM(I) X(I) = FLUX
+C
+C The algorithm used is that due to Wilczek and Drapatz. The dual
+C problem of finding the Lagrange multipliers is used instead of the
+C primal approach of finding X(I) directly. It is easy to show that the
+C MEM image is given by:
+C
+C       X(I) = FLUX * EXP(-SUM(J) [ A(J,I) * LAMBDA(J)] ) / Z
+C
+C where the partition function is:
+C
+C   Z = SUM(I) EXP(-SUM(J) [ A(J,I) * LAMBDA(J)] )
+C
+C This version calls the Numerical Recipes Conjugate Gradients routine.
+C
+X      SUBROUTINE MMSOLVE (DSZ, ISZ, TOL, NITER, IFLUX, OMEGA, DEFI, 
+X     $   DOBSI, SIGMAI, MEMF, LAMBDA)
+C
+C Main routine for MEM solution.
+C
+X      REAL TOL, MEMF(*), DEFI(*), DOBSI(*), SIGMAI(*), LAMBDA(*),
+X     $   IFLUX, OMEGA
+X      INTEGER DSZ, ISZ, NITER
+C
+X      REAL FLUX
+X      INTEGER DATASZ, IMSZ, MEM, DEF, DOBS, DPRED, SIGMA
+X      COMMON /MEMCOMI/ FLUX, DATASZ, IMSZ, MEM, DEF, DOBS, DPRED,
+X     $   SIGMA
+X      REAL MM(1)
+X      COMMON /MEMCOM/ MM
+C
+X      REAL MU
+C
+C  Set up pointers
+C
+X      DATASZ = DSZ
+X      IMSZ = ISZ
+X      MEM = 1
+X      DEF = MEM + IMSZ
+X      DOBS = DEF + IMSZ + 1
+X      DPRED = DOBS + DATASZ + 1
+X      SIGMA = DPRED + DATASZ + 1 
+C
+X      FLUX = IFLUX
+X      DO 1 J = 1, DATASZ
+X         MM(DOBS+J-1) = DOBSI(J)
+X         MM(SIGMA+J-1) = SIGMAI(J)
+X 1    CONTINUE
+C
+X      MU = 0.0
+X      IF(OMEGA.GT.0.0) THEN
+X         MM(DOBS+DATASZ) = OMEGA
+X         DO 100 J = 1, DATASZ
+X            MU = MU + (MM(DOBS+J-1)*MM(SIGMA+J-1))**2
+X 100     CONTINUE
+X         MU = SQRT(MU/(4.0*OMEGA))
+X      ENDIF
+X      LAMBDA(DATASZ+1) = MU
+C
+X      DO 10 I = 1, IMSZ
+X         MM(DEF+I-1) = DEFI(I)
+X 10   CONTINUE
+C
+X      CALL FRPRMN (LAMBDA, DATASZ, TOL, NITER, Z)
+C
+X      DO 20 I = 1, IMSZ
+X         MEMF(I) = MM(MEM+I-1) 
+X 20   CONTINUE
+C
+X      END
+C
+X      SUBROUTINE F (LAMBDA, Z)
+X      REAL LAMBDA(*), Z
+X      INTEGER I
+X      REAL MAXDR, LAMTRM, NORM
+X      DATA MAXDR /1E38/
+X      REAL FLUX
+X      INTEGER DATASZ, IMSZ, MEM, DEF, DOBS, DPRED, SIGMA
+X      COMMON /MEMCOMI/ FLUX, DATASZ, IMSZ, MEM, DEF, DOBS, DPRED,
+X     $   SIGMA
+X      REAL MM(1)
+X      COMMON /MEMCOM/ MM
+C
+C Find A^T * Lambda
+C
+X      CALL MMATD (DATASZ, IMSZ, LAMBDA, MM(MEM))
+C
+C Find new Image and partition function
+C
+X      LAMTRM = LOG(MAXDR)
+X      NORM = 0.0
+X      DO 10 I = 1, IMSZ
+X         MM(MEM+I-1) = MM(DEF+I-1) * EXP(MIN(-MM(MEM+I-1),LAMTRM))
+X         NORM = NORM + MM(MEM+I-1)
+X  10  CONTINUE
+X      DO 20 I = 1, IMSZ
+X         MM(MEM+I-1) = FLUX * MM(MEM+I-1) / NORM
+X  20  CONTINUE
+C
+X      Z = FLUX*LOG(NORM)
+C
+X      END
+C
+X      REAL FUNCTION FUNC(LAMBDA)
+X      REAL LAMBDA(*)
+X      INTEGER J
+X      REAL Z, MU, OMEGA
+C
+X      REAL FLUX
+X      INTEGER DATASZ, IMSZ, MEM, DEF, DOBS, DPRED, SIGMA
+X      COMMON /MEMCOMI/ FLUX, DATASZ, IMSZ, MEM, DEF, DOBS, DPRED,
+X     $   SIGMA
+X      REAL MM(1)
+X      COMMON /MEMCOM/ MM
+C
+C Find Image for this set of Lagrange Multipliers
+C
+X      CALL F (LAMBDA, Z)
+X      DO 30 J = 1, DATASZ
+X         Z = Z + LAMBDA(J) * MM(DOBS+J-1)
+X   30 CONTINUE
+X      MU = LAMBDA(DATASZ+1)
+X      IF(MU.GT.0.0) THEN
+X         OMEGA = MM(DOBS+DATASZ)
+X         Z = Z + MU * OMEGA 
+X         DO 40 J = 1,DATASZ
+X            Z = Z + (LAMBDA(J)*MM(SIGMA+J-1))**2 / (4.0*MU)
+X   40    CONTINUE
+X      ENDIF
+X      FUNC = Z
+X      RETURN
+X      END
+C
+X      SUBROUTINE DFUNC (LAMBDA, GRADZ)
+X      REAL LAMBDA(*), GRADZ(*)
+C
+X      REAL FLUX
+X      INTEGER DATASZ, IMSZ, MEM, DEF, DOBS, DPRED, SIGMA
+X      COMMON /MEMCOMI/ FLUX, DATASZ, IMSZ, MEM, DEF, DOBS, DPRED,
+X     $   SIGMA
+X      REAL MM(1)
+X      COMMON /MEMCOM/ MM
+C
+X      REAL MU, Z
+X      INTEGER J
+C
+C Find current Image
+C
+X      CALL F (LAMBDA, Z)
+C
+C Find predicted data for this image using A*X
+C
+X      CALL MMAX (IMSZ, DATASZ, MM(MEM), MM(DPRED))
+C
+C Now calculate gradient
+C
+X      DO 10 J = 1, DATASZ
+X         GRADZ(J) = (MM(DOBS+J-1) - MM(DPRED+J-1))
+X 10   CONTINUE
+C
+X      MU=LAMBDA(DATASZ+1)
+X      IF(MU.GT.0.0) THEN
+X         GRADZ(DATASZ+1)=0.0
+X         DO 20 J = 1, DATASZ
+X            GRADZ(DATASZ+1)=GRADZ(DATASZ+1)
+X     $         + (LAMBDA(J)*MM(SIGMA+J-1))**2
+X            GRADZ(J) = GRADZ(J)
+X     $         + LAMBDA(J)*MM(SIGMA+J-1)**2/(2.0*MU) 
+X 20      CONTINUE
+X      ENDIF
+C
+X      END
+C
+SHAR_EOF
+  $shar_touch -am 1017082795 'nmem.f' &&
+  chmod 0644 'nmem.f' ||
+  echo 'restore of nmem.f failed'
+  shar_count="`wc -c < 'nmem.f'`"
+  test 4590 -eq "$shar_count" ||
+    echo "nmem.f: original size 4590, current size $shar_count"
+fi
+# ============= nr.f ==============
+if test -f 'nr.f' && test X"$1" != X"-c"; then
+  echo 'x - skipping nr.f (file already exists)'
+else
+  echo 'x - extracting nr.f (text)'
+  sed 's/^X//' << 'SHAR_EOF' > 'nr.f' &&
+X      SUBROUTINE FRPRMN(P,N,FTOL,ITER,FRET)
+X      PARAMETER (NMAX=1000,EPS=1.E-10)
+X      INTEGER ITMAX
+X      DIMENSION P(N),G(NMAX),H(NMAX),XI(NMAX)
+X      FP=FUNC(P)
+X      CALL DFUNC(P,XI)
+X      DO 11 J=1,N
+X        G(J)=-XI(J)
+X        H(J)=G(J)
+X        XI(J)=H(J)
+11    CONTINUE
+X      ITMAX=ITER
+X      DO 14 ITS=1,ITMAX
+X        ITER=ITS
+X        CALL LINMIN(P,XI,N,FRET)
+X        IF(2.*ABS(FRET-FP).LE.FTOL*(ABS(FRET)+ABS(FP)+EPS))RETURN
+X        FP=FUNC(P)
+X        CALL DFUNC(P,XI)
+X        GG=0.
+X        DGG=0.
+X        DO 12 J=1,N
+X          GG=GG+G(J)**2
+C          DGG=DGG+XI(J)**2
+X          DGG=DGG+(XI(J)+G(J))*XI(J)
+12      CONTINUE
+X        IF(GG.LE.0.0)RETURN
+X        GAM=DGG/GG
+X        DO 13 J=1,N
+X          G(J)=-XI(J)
+X          H(J)=G(J)+GAM*H(J)
+X          XI(J)=H(J)
+13      CONTINUE
+14    CONTINUE
+X      PAUSE 'FRPR maximum iterations exceeded'
+X      RETURN
+X      END
+C
+X      FUNCTION F1DIM(X)
+X      PARAMETER (NMAX=100)
+X      COMMON /F1COM/ NCOM,PCOM(NMAX),XICOM(NMAX)
+X      DIMENSION XT(NMAX)
+X      DO 11 J=1,NCOM
+X        XT(J)=PCOM(J)+X*XICOM(J)
+11    CONTINUE
+X      F1DIM=FUNC(XT)
+X      RETURN
+X      END
+C
+X      FUNCTION DF1DIM(X)
+X      PARAMETER (NMAX=100)
+X      COMMON /F1COM/ NCOM,PCOM(NMAX),XICOM(NMAX)
+X      DIMENSION XT(NMAX),DF(NMAX)
+X      DO 11 J=1,NCOM
+X        XT(J)=PCOM(J)+X*XICOM(J)
+11    CONTINUE
+X      CALL DFUNC(XT,DF)
+X      DF1DIM=0.
+X      DO 12 J=1,NCOM
+X        DF1DIM=DF1DIM+DF(J)*XICOM(J)
+12    CONTINUE
+X      RETURN
+X      END
+C
+X      SUBROUTINE LINMIN(P,XI,N,FRET)
+X      PARAMETER (NMAX=100,TOL=1.E-6)
+X      EXTERNAL F1DIM, DF1DIM
+X      DIMENSION P(N),XI(N)
+X      COMMON /F1COM/ NCOM,PCOM(NMAX),XICOM(NMAX)
+X      NCOM=N
+X      DO 11 J=1,N
+X        PCOM(J)=P(J)
+X        XICOM(J)=XI(J)
+11    CONTINUE
+X      AX=0.
+X      XX=1.
+X      BX=2.
+X      CALL MNBRAK(AX,XX,BX,FA,FX,FB,F1DIM)
+X      FRET=DBRENT(AX,XX,BX,F1DIM,DF1DIM,TOL,XMIN)
+X      DO 12 J=1,N
+X        XI(J)=XMIN*XI(J)
+X        P(J)=P(J)+XI(J)
+12    CONTINUE
+X      RETURN
+X      END
+C
+X      SUBROUTINE MNBRAK(AX,BX,CX,FA,FB,FC,FUNC)
+X      PARAMETER (GOLD=1.618034, GLIMIT=100., TINY=1.E-20)
+X      FA=FUNC(AX)
+X      FB=FUNC(BX)
+X      IF(FB.GT.FA)THEN
+X        DUM=AX
+X        AX=BX
+X        BX=DUM
+X        DUM=FB
+X        FB=FA
+X        FA=DUM
+X      ENDIF
+X      CX=BX+GOLD*(BX-AX)
+X      FC=FUNC(CX)
+1     IF(FB.GE.FC)THEN
+X        R=(BX-AX)*(FB-FC)
+X        Q=(BX-CX)*(FB-FA)
+X        U=BX-((BX-CX)*Q-(BX-AX)*R)/(2.*SIGN(MAX(ABS(Q-R),TINY),Q-R))
+X        ULIM=BX+GLIMIT*(CX-BX)
+X        IF((BX-U)*(U-CX).GT.0.)THEN
+X          FU=FUNC(U)
+X          IF(FU.LT.FC)THEN
+X            AX=BX
+X            FA=FB
+X            BX=U
+X            FB=FU
+X            GO TO 1
+X          ELSE IF(FU.GT.FB)THEN
+X            CX=U
+X            FC=FU
+X            GO TO 1
+X          ENDIF
+X          U=CX+GOLD*(CX-BX)
+X          FU=FUNC(U)
+X        ELSE IF((CX-U)*(U-ULIM).GT.0.)THEN
+X          FU=FUNC(U)
+X          IF(FU.LT.FC)THEN
+X            BX=CX
+X            CX=U
+X            U=CX+GOLD*(CX-BX)
+X            FB=FC
+X            FC=FU
+X            FU=FUNC(U)
+X          ENDIF
+X        ELSE IF((U-ULIM)*(ULIM-CX).GE.0.)THEN
+X          U=ULIM
+X          FU=FUNC(U)
+X        ELSE
+X          U=CX+GOLD*(CX-BX)
+X          FU=FUNC(U)
+X        ENDIF
+X        AX=BX
+X        BX=CX
+X        CX=U
+X        FA=FB
+X        FB=FC
+X        FC=FU
+X        GO TO 1
+X      ENDIF
+X      RETURN
+X      END
+C
+X      FUNCTION DBRENT(AX,BX,CX,F,DF,TOL,XMIN)
+X      PARAMETER (ITMAX=100,ZEPS=1.0E-10)
+X      LOGICAL OK1,OK2
+X      A=MIN(AX,CX)
+X      B=MAX(AX,CX)
+X      V=BX
+X      W=V
+X      X=V
+X      E=0.
+X      FX=F(X)
+X      FV=FX
+X      FW=FX
+X      DX=DF(X)
+X      DV=DX
+X      DW=DX
+X      DO 11 ITER=1,ITMAX
+X        XM=0.5*(A+B)
+X        TOL1=TOL*ABS(X)+ZEPS
+X        TOL2=2.*TOL1
+X        IF(ABS(X-XM).LE.(TOL2-.5*(B-A))) GOTO 3
+X        IF(ABS(E).GT.TOL1) THEN
+X          D1=2.*(B-A)
+X          D2=D1
+X          IF(DW.NE.DX) D1=(W-X)*DX/(DX-DW)
+X          IF(DV.NE.DX) D2=(V-X)*DX/(DX-DV)
+X          U1=X+D1
+X          U2=X+D2
+X          OK1=((A-U1)*(U1-B).GT.0.).AND.(DX*D1.LE.0.)
+X          OK2=((A-U2)*(U2-B).GT.0.).AND.(DX*D2.LE.0.)
+X          OLDE=E
+X          E=D
+X          IF(.NOT.(OK1.OR.OK2))THEN
+X            GO TO 1
+X          ELSE IF (OK1.AND.OK2)THEN
+X            IF(ABS(D1).LT.ABS(D2))THEN
+X              D=D1
+X            ELSE
+X              D=D2
+X            ENDIF
+X          ELSE IF (OK1)THEN
+X            D=D1
+X          ELSE
+X            D=D2
+X          ENDIF
+X          IF(ABS(D).GT.ABS(0.5*OLDE))GO TO 1
+X          U=X+D
+X          IF(U-A.LT.TOL2 .OR. B-U.LT.TOL2) D=SIGN(TOL1,XM-X)
+X          GOTO 2
+X        ENDIF
+1       IF(DX.GE.0.) THEN
+X          E=A-X
+X        ELSE
+X          E=B-X
+X        ENDIF
+X        D=0.5*E
+2       IF(ABS(D).GE.TOL1) THEN
+X          U=X+D
+X          FU=F(U)
+X        ELSE
+X          U=X+SIGN(TOL1,D)
+X          FU=F(U)
+X          IF(FU.GT.FX)GO TO 3
+X        ENDIF
+X        DU=DF(U)
+X        IF(FU.LE.FX) THEN
+X          IF(U.GE.X) THEN
+X            A=X
+X          ELSE
+X            B=X
+X          ENDIF
+X          V=W
+X          FV=FW
+X          DV=DW
+X          W=X
+X          FW=FX
+X          DW=DX
+X          X=U
+X          FX=FU
+X          DX=DU
+X        ELSE
+X          IF(U.LT.X) THEN
+X            A=U
+X          ELSE
+X            B=U
+X          ENDIF
+X          IF(FU.LE.FW .OR. W.EQ.X) THEN
+X            V=W
+X            FV=FW
+X            DV=DW
+X            W=U
+X            FW=FU
+X            DW=DU
+X          ELSE IF(FU.LE.FV .OR. V.EQ.X .OR. V.EQ.W) THEN
+X            V=U
+X            FV=FU
+X            DV=DU
+X          ENDIF
+X        ENDIF
+11    CONTINUE
+X      PAUSE 'DBRENT exceeded maximum iterations.'
+3     XMIN=X
+X      DBRENT=FX
+X      RETURN
+X      END
+SHAR_EOF
+  $shar_touch -am 1017082795 'nr.f' &&
+  chmod 0644 'nr.f' ||
+  echo 'restore of nr.f failed'
+  shar_count="`wc -c < 'nr.f'`"
+  test 5534 -eq "$shar_count" ||
+    echo "nr.f: original size 5534, current size $shar_count"
+fi
+exit 0

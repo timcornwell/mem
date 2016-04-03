@@ -1,0 +1,53 @@
+#
+DEFINES=-DCOMP_GNU -DMACH_INTEL -DOS_LINUX
+#
+#
+OPT=-O2
+#
+# FORTRAN directives: compile only, optimize
+#
+FFLAGS=${DEFINES} -I${SDEROOT}/source/include ${OPT} -fPIC
+#
+# c directives: compile only, optimize
+#
+CFLAGS=${DEFINES} -I${SDEROOT}/source/include ${OPT} -fno-strength-reduce
+#
+# loader directives: optimize
+#
+LDFLAGS=${OPT}
+#
+# Shared libraries?
+#
+SHARE=NO
+#
+# Name of standard public library 
+#
+SLIB=${SDELIB}/libsde.a
+MLIB=${SDELIB}/libmainsde.a
+#
+# Names of all public libraries used
+#
+TLIB=-lpgplot /usr/X11R6/lib/libX11.a -lg2c -lm
+#
+# Name of FORTRAN compiler
+#
+FC=g77
+#
+# Name of c compiler
+#
+CC=gcc
+#
+# Name of c preprocessor
+#
+CPP=/lib/cpp
+#
+# Name of loader
+#
+LD=g77
+#
+# Python and f2py
+#
+PYFLAGS=-DPYTHON -I${SDEROOT}/source/include 
+PYTHON=python2
+F2PY=f2py2
+PYLIB=-L${SDELIB} -lmainsde -lsde -lpgplot -L/usr/X11R6/lib/ -lX11 
